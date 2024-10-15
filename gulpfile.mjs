@@ -11,8 +11,8 @@ const sassCompiler = gulpSass(sass); // Вказуємо компілятор д
 
 // Шляхи до файлів
 const paths = {
-    scss: './src/scss/style.scss',
-    html: './src/index.html'
+    scss: './src/scss/*.scss',
+    html: './src/*.html'
 };
 
 // Компіляція SCSS у CSS
@@ -29,16 +29,22 @@ gulp.task('sass', function() {
         .pipe(gulp.dest('./dist/css'))
         .pipe(browserSync.stream());
 });
+// Перенесення HTML файлів
+gulp.task('html', function() {
+    return gulp.src(paths.html)
+        .pipe(gulp.dest('./dist')) // Переносимо HTML файли у папку dist
+        .pipe(browserSync.stream()); // Додаємо оновлення після компіляції HTML
+});
 
 // Оновлення сторінки в реальному часі
 gulp.task('serve', function() {
     browserSync.init({
-        server: './src'
+        server: './dist'
     });
 
-    gulp.watch(paths.scss, gulp.series('sass')); // Спостерігає за змінами в SCSS
+    gulp.watch(paths.scss, gulp.series('html','sass')); // Спостерігає за змінами в SCSS
     gulp.watch(paths.html).on('change', browserSync.reload); // Оновлює сторінку при зміні HTML
 });
 
 // За замовчуванням виконуємо компіляцію та сервер
-gulp.task('default', gulp.series('sass', 'serve'));
+gulp.task('default', gulp.series('html','sass', 'serve'));
